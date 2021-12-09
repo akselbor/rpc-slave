@@ -90,7 +90,9 @@ def receive():
 
     if actions:
         threading.Thread(target=execute, args=(task, actions)).start()
-        return '', 203
+        return '', 202
+    else:
+        return '', 500
 
 
 threading.Thread(target=lambda: app.run(port=8080)).start()
