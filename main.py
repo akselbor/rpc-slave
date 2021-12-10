@@ -37,13 +37,15 @@ def error(master_addr, task, action, json):
 
 
 def temp_file(extension):
+    pass
 
 
 def execute_powershell(body):
-    result = subprocess.run('powershell')
+    pass  # result = subprocess.run('powershell')
 
 
 def execute_shell(body):
+    return
     result = subprocess.run(
         ''
     )
