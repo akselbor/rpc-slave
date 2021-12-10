@@ -36,12 +36,17 @@ def error(master_addr, task, action, json):
     )
 
 
+def temp_file(extension):
+
+
 def execute_powershell(body):
-    pass
+    result = subprocess.run('powershell')
 
 
 def execute_shell(body):
-    pass
+    result = subprocess.run(
+        ''
+    )
 
 
 def execute_python(body):
@@ -96,7 +101,8 @@ def receive():
         return '', 500
 
 
-threading.Thread(target=lambda: app.run(port=8080)).start()
+threading.Thread(target=lambda: app.run(
+    port=8080, debug=False, host="0.0.0.0")).start()
 
 time.sleep(5)
 
