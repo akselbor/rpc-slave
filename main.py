@@ -5,9 +5,9 @@ import threading
 import time
 import subprocess
 import uuid
+import pip
 from tqdm import tqdm
 from typing import Optional, List, Tuple
-from flask import Flask, jsonify, request
 
 
 class Channel:
@@ -91,19 +91,60 @@ class Action:
         self.source = source
 
     def execute(self) -> Tuple[bool, dict]:
-        return False, {'test': 'does this work?'}
+        if self.kind == 'python_eval':
+            return Action.eval_python(self.source)
+
+        if self.kind == 'python_exec':
+            return Action.exec_python(self.source)
+
+        if self.kind == 'requirements':
+            return Action.live_install(self.source)
+
+        if self.kind == 'powershell':
+            return Action.powershell(self.source)
+
+        if self.kind == 'shell':
+            return Action.shell(self.source)
+
+        if self.kind == 'python':
+            return Action.python(self.source)
+
+        return True, f"unkown type '{self.kind}'"
 
     @staticmethod
     def powershell(source: str):
-        pass
+        return False, 'test'
 
     @staticmethod
     def shell(source: str):
-        pass
+        return False, 'test'
 
     @staticmethod
     def python(source: str):
-        file = temp_file(source, 'py')
+        return False, 'test'
+
+    @staticmethod
+    def eval_python(source: str):
+        """Eval a python expression within the confinements of the running process"""
+        try:
+            return False, eval(source)
+        except Exception as e:
+            return True, e
+
+    @staticmethod
+    def exec_python(source: str):
+        """Executes a python statement or program, returning None"""
+        try:
+            return False, exec(source)
+        except Exception as e:
+            return True, e
+
+    @staticmethod
+    def live_install(source: str):
+        requirements = source.splitlines()
+        code = pip.main(['install', *requirements])
+
+        return code != 0, ''
 
 
 class Task:
@@ -120,29 +161,6 @@ def temp_file(content, extension):
         f.write(content)
 
     return name
-
-
-def execute_python(body):
-    pass
-
-
-def execute(task, actions):
-    for i, action in enumerate(actions):
-        kind = action['type']
-        body = action['source']
-        try:
-            result = {
-                'powershell': execute_powershell,
-                'shell': execute_shell,
-                'python': execute_python
-            }[kind](body)
-
-            send(master, task, i, result)
-        except Exception as e:
-            error(master, task, i, jsonify(e))
-            return
-
-    completed(master, task)
 
 
 parser = argparse.ArgumentParser()
