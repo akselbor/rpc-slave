@@ -5,6 +5,7 @@ import threading
 import time
 import subprocess
 import uuid
+from tqdm import tqdm
 from typing import Optional, List, Tuple
 from flask import Flask, jsonify, request
 
@@ -24,7 +25,7 @@ class Channel:
 
         response.raise_for_status()
 
-    def send(task, action, json):
+    def send(self, task, action, json):
         """Send the result of an action to the master node."""
         response = requests.post(
             f'{self.address}/{self.hostname}/{task}/{action}/result',
@@ -90,7 +91,7 @@ class Action:
         self.source = source
 
     def execute(self) -> Tuple[bool, dict]:
-        pass
+        return False, {'test': 'does this work?'}
 
     @staticmethod
     def powershell(source: str):
@@ -158,25 +159,34 @@ except Exception as e:
     print(f'Failed to establish connection to master node: {e}')
     exit(1)
 
-while True:
+
+def loop():
+    """A generator that always returns None"""
+    while True:
+        yield None
+
+
+it = tqdm(loop(), position=0, leave=False)
+for _ in it:
     # Check if the master node has any
     task = channel.poll()
-
     # We will only wait in cases where there are no available tasks
     if task is None:
+        it.set_description('<awaiting new task>')
         time.sleep(args.poll / 1000)
         continue
 
+    it.set_description(f'{task.name}')
     # Execute each action specified in the task,
     # short-circuiting if any of them fails
-    for i, action in enumerate(task.actions):
+    for i, action in tqdm(list(enumerate(task.actions)), position=1, leave=False):
         error, content = action.execute()
 
         if error:
             channel.error(task.name, i, content)
             break
 
-        channel.send(i, content)
+        channel.send(task.name, i, content)
 
     # Notify the master node that we completed the task
     channel.completed(task.name)
