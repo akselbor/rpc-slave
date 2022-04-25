@@ -147,7 +147,7 @@ class Action:
     def live_install(source: str):
         requirements = source.splitlines()
         code = pip.main(['install', *requirements])
-
+        print(f'pip code = {code}')
         return code != 0, ''
 
 
@@ -203,6 +203,9 @@ for _ in it:
     # short-circuiting if any of them fails
     for i, action in tqdm(list(enumerate(task.actions)), position=1, leave=False):
         error, content = action.execute()
+
+        print(error)
+        print(content)
 
         if error:
             channel.error(task.name, i, content)
