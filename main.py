@@ -202,8 +202,8 @@ for _ in it:
     # Execute each action specified in the task,
     # short-circuiting if any of them fails
     for i, action in tqdm(list(enumerate(task.actions)), position=1, leave=False):
+        print(f'action {i}')
         error, content = action.execute()
-
         print(error)
         print(content)
 
