@@ -121,7 +121,7 @@ class Action:
             subprocess.run(source, shell=True, check=True)
             return False, None
         except Exception as e:
-            return False, e
+            return False, str(e)
 
     @staticmethod
     def python(source: str):
@@ -133,7 +133,7 @@ class Action:
         try:
             return False, eval(source)
         except Exception as e:
-            return True, e
+            return True, str(e)
 
     @staticmethod
     def exec_python(source: str):
@@ -141,7 +141,7 @@ class Action:
         try:
             return False, exec(source)
         except Exception as e:
-            return True, e
+            return True, str(e)
 
     @staticmethod
     def live_install(source: str):
@@ -202,10 +202,7 @@ for _ in it:
     # Execute each action specified in the task,
     # short-circuiting if any of them fails
     for i, action in tqdm(list(enumerate(task.actions)), position=1, leave=False):
-        print(f'action {i}')
         error, content = action.execute()
-        print(error)
-        print(content)
 
         if error:
             channel.error(task.name, i, content)
