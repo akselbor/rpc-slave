@@ -113,15 +113,19 @@ class Action:
 
     @staticmethod
     def powershell(source: str):
-        return False, 'test'
+        return True, 'Not yet implemented'
 
     @staticmethod
     def shell(source: str):
-        return False, 'test'
+        try:
+            subprocess.run(source, shell=True, check=True)
+            return False, None
+        except Exception as e:
+            return False, e
 
     @staticmethod
     def python(source: str):
-        return False, 'test'
+        return True, 'Not yet implemented'
 
     @staticmethod
     def eval_python(source: str):
